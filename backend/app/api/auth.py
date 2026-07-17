@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -15,6 +15,10 @@ from app.domain.identity.authentication import (
     AuthenticationFailedError,
 )
 from app.domain.identity.login import login_user
+from app.domain.identity.sessions import (
+    SessionNotFoundError,
+    revoke_session,
+)
 from app.models.user import User
 from app.models.user_credential import UserCredential
 from app.schemas.auth import (
@@ -101,3 +105,44 @@ def get_authenticated_user(
     """Return safe information for the active authenticated user."""
 
     return CurrentUserResponse.model_validate(current_user)
+
+
+@router.post(
+    "/logout",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def logout(
+    response: Response,
+    session: Annotated[Session, Depends(get_db_session)],
+    session_token: Annotated[
+        str | None,
+        Cookie(alias="choretracker_session"),
+    ] = None,
+) -> Response:
+    """Revoke the current session and clear its browser cookie."""
+
+    settings = get_settings()
+
+    if settings.auth_cookie_name != "choretracker_session":
+        raise RuntimeError("Custom authentication cookie names are not yet supported.")
+
+    if session_token is not None:
+        try:
+            revoke_session(
+                session,
+                token=session_token,
+            )
+            session.commit()
+        except SessionNotFoundError:
+            session.rollback()
+
+    response.delete_cookie(
+        key=settings.auth_cookie_name,
+        path="/",
+        secure=settings.auth_cookie_secure,
+        httponly=True,
+        samesite=settings.auth_cookie_samesite,
+    )
+    response.status_code = status.HTTP_204_NO_CONTENT
+
+    return response
