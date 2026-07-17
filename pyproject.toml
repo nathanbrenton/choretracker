@@ -11,6 +11,7 @@ dependencies = [
   "alembic",
   "fastapi",
   "psycopg[binary]",
+  "pwdlib[argon2]",
   "pydantic-settings",
   "sqlalchemy",
   "uvicorn[standard]",
