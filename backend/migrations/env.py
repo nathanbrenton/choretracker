@@ -4,6 +4,7 @@ from logging.config import fileConfig
 
 from alembic import context
 from app.core.config import get_settings
+from app.db.base import Base
 from sqlalchemy import engine_from_config, pool
 
 config = context.config
@@ -15,8 +16,8 @@ config.set_main_option("sqlalchemy.url", settings.database_url)
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# No application models exist yet, so autogeneration has no metadata target.
-target_metadata = None
+# Alembic compares migrations against all imported model metadata.
+target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
