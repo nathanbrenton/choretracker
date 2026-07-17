@@ -25,6 +25,10 @@ class Settings(BaseSettings):
 
     frontend_port: int = Field(default=51810, ge=1, le=65535)
 
+    auth_cookie_name: str = "choretracker_session"
+    auth_cookie_secure: bool = False
+    auth_cookie_samesite: Literal["lax", "strict", "none"] = "lax"
+
     postgres_db: str = "choretracker"
     postgres_user: str = "choretracker_app"
     postgres_password: str = "development-only-password"
