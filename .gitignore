@@ -1,0 +1,35 @@
+# Python virtual environments
+.venv/
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+
+# Python test and lint caches
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local configuration and secrets
+.env
+.env.local
+
+# macOS metadata
+.DS_Store
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Frontend dependencies and build output
+node_modules/
+dist/
+
+# Local runtime data
+var/
+
+# Python packaging metadata
+*.egg-info/
