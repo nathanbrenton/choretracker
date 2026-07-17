@@ -64,7 +64,9 @@ def login(
         AccountDisabledError,
         AccountLockedError,
     ) as exc:
-        session.rollback()
+        # Persist failed-attempt counters and lockout timestamps while still
+        # returning the same generic response for every authentication failure.
+        session.commit()
 
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

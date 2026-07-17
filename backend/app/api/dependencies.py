@@ -2,9 +2,10 @@
 
 from typing import Annotated
 
-from fastapi import Cookie, Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
+from app.api.auth_cookies import read_auth_cookie
 from app.core.config import get_settings
 from app.db.session import get_db_session
 from app.domain.identity.sessions import (
@@ -19,18 +20,13 @@ DatabaseSession = Annotated[Session, Depends(get_db_session)]
 
 
 def get_current_user(
+    request: Request,
     session: DatabaseSession,
-    session_token: Annotated[str | None, Cookie(alias="choretracker_session")] = None,
 ) -> User:
-    """Resolve the authenticated user from the server-managed session cookie."""
+    """Resolve the authenticated user from the configured session cookie."""
 
     settings = get_settings()
-
-    # The explicit parameter alias above matches the current default cookie
-    # name. Reject a deployment-time rename until dynamic cookie extraction is
-    # introduced deliberately.
-    if settings.auth_cookie_name != "choretracker_session":
-        raise RuntimeError("Custom authentication cookie names are not yet supported.")
+    session_token = read_auth_cookie(request, settings)
 
     if session_token is None:
         raise HTTPException(
