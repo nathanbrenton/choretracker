@@ -28,3 +28,15 @@ class LoginResponse(BaseModel):
 
     user: LoginUserResponse
     must_change_password: bool
+
+
+class CurrentUserResponse(BaseModel):
+    """Safe information about the currently authenticated user."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    username: str
+    display_name: str
+    status: str
+    is_developer: bool

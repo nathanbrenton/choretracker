@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.api.dependencies import get_current_user
 from app.core.config import get_settings
 from app.db.session import get_db_session
 from app.domain.identity.authentication import (
@@ -14,8 +15,14 @@ from app.domain.identity.authentication import (
     AuthenticationFailedError,
 )
 from app.domain.identity.login import login_user
+from app.models.user import User
 from app.models.user_credential import UserCredential
-from app.schemas.auth import LoginRequest, LoginResponse, LoginUserResponse
+from app.schemas.auth import (
+    CurrentUserResponse,
+    LoginRequest,
+    LoginResponse,
+    LoginUserResponse,
+)
 
 router = APIRouter(
     prefix="/auth",
@@ -82,3 +89,15 @@ def login(
         user=LoginUserResponse.model_validate(result.user),
         must_change_password=credential.must_change_password,
     )
+
+
+@router.get(
+    "/me",
+    response_model=CurrentUserResponse,
+)
+def get_authenticated_user(
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> CurrentUserResponse:
+    """Return safe information for the active authenticated user."""
+
+    return CurrentUserResponse.model_validate(current_user)
