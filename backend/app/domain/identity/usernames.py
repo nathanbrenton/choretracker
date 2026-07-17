@@ -18,8 +18,7 @@ def normalize_username(value: str) -> str:
 
     if not USERNAME_MIN_LENGTH <= len(normalized) <= USERNAME_MAX_LENGTH:
         raise InvalidUsernameError(
-            f"Username must be between {USERNAME_MIN_LENGTH} "
-            f"and {USERNAME_MAX_LENGTH} characters."
+            f"Username must be between {USERNAME_MIN_LENGTH} and {USERNAME_MAX_LENGTH} characters."
         )
 
     if USERNAME_PATTERN.fullmatch(normalized) is None:
